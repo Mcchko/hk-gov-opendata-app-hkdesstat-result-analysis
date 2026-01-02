@@ -1,0 +1,2118 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>「HKDSE成績分析」查詢系統</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" />
+    <style>
+        .element-hidden {
+            display: none !important;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+            min-height: 100vh;
+            padding: 16px;
+            color: #1f2937;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 20px;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .header h1 {
+            color: #111827;
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-align: center;
+        }
+
+        .header .subtitle {
+            color: #6b7280;
+            font-size: 1rem;
+            line-height: 1.5;
+            text-align: center;
+        }
+
+        .form-section {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 16px;
+            padding: 25px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #374151;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .form-group label i {
+            color: #3b82f6;
+        }
+
+        .form-control {
+            padding: 12px 16px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.2s ease;
+            background: white;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .search-group {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .search-input {
+            flex: 1;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            margin-top: 10px;
+        }
+
+        .btn {
+            padding: 12px 28px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+        }
+
+        .btn-secondary {
+            background: #f3f4f6;
+            color: #374151;
+            border: 1px solid #d1d5db;
+        }
+
+        .btn-secondary:hover {
+            background: #e5e7eb;
+            transform: translateY(-2px);
+        }
+
+        .main-content {
+            display: flex;
+            flex: 1;
+            gap: 20px;
+            height: 600px;
+        }
+
+        .data-section {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            overflow-y: auto;
+            min-height: 0;
+        }
+
+        .data-header {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .data-header h2 {
+            color: #111827;
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .data-header .subtitle {
+            color: #6b7280;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        .data-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px;
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 20px;
+            border: 1px solid #e5e7eb;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 10px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #3b82f6;
+            display: block;
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: #6b7280;
+            margin-top: 4px;
+        }
+
+        .filter-section {
+            background: rgba(249, 250, 251, 0.9);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 15px;
+            border: 1px solid #e5e7eb;
+        }
+
+        .filter-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 10px;
+        }
+
+        .filter-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .filter-label {
+            font-weight: 600;
+            color: #374151;
+            font-size: 0.9rem;
+            min-width: 100px;
+        }
+
+        .filter-select {
+            padding: 8px 12px;
+            border: 2px solid #e5e7eb;
+            border-radius: 6px;
+            background: white;
+            font-size: 0.9rem;
+            min-width: 150px;
+            flex: 1;
+        }
+
+        .filter-select:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .data-type-toggle {
+            display: flex;
+            gap: 5px;
+            background: #f3f4f6;
+            border-radius: 8px;
+            padding: 4px;
+        }
+
+        .data-type-btn {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 6px;
+            background: transparent;
+            color: #6b7280;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            flex: 1;
+        }
+
+        .data-type-btn.active {
+            background: #3b82f6;
+            color: white;
+            box-shadow: 0 2px 4px rgba(59, 130, 246, 0.2);
+        }
+
+        .data-type-btn:hover:not(.active) {
+            background: #e5e7eb;
+        }
+
+        .accordion-container {
+            margin-top: 20px;
+        }
+
+        .subject-group {
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            overflow: hidden;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .subject-group:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .dataset-header {
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            color: white;
+            padding: 12px 15px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 600;
+            margin-top: 5px;
+            border-radius: 10px;
+        }
+
+        .dataset-header.active {
+            background: linear-gradient(135deg, #1d4ed8 0%, #1e3a8a 100%);
+        }
+
+        .dataset-header i {
+            transition: transform 0.3s ease;
+        }
+
+        .dataset-header.collapsed i {
+            transform: rotate(-90deg);
+        }
+
+        .dataset-content {
+            padding: 0;
+            background: white;
+        }
+
+        .subject-item {
+            border-bottom: 1px solid #e5e7eb;
+            padding: 15px;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+        .subject-item:last-child {
+            border-bottom: none;
+        }
+
+        .subject-item:hover {
+            background-color: #f8fafc;
+        }
+
+        .subject-item.active {
+            background-color: #eff6ff;
+            border-left: 4px solid #3b82f6;
+        }
+
+        .subject-name {
+            font-weight: 600;
+            color: #111827;
+            margin-bottom: 5px;
+            font-size: 1.1rem;
+        }
+
+        .subject-details {
+            color: #6b7280;
+            font-size: 0.9rem;
+            margin-bottom: 8px;
+        }
+
+        .subject-info {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 8px;
+        }
+
+        .info-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            background: #e0f2fe;
+            color: #0369a1;
+        }
+
+        .info-badge i {
+            margin-right: 4px;
+        }
+
+        .subject-stats-details {
+            background: #f8fafc;
+            border-top: 1px solid #e5e7eb;
+            padding: 15px;
+            margin-top: 10px;
+            border-radius: 0 0 8px 8px;
+        }
+
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #f3f4f6;
+        }
+
+        .stat-label {
+            font-weight: 500;
+            color: #6b7280;
+        }
+
+        .stat-value {
+            font-weight: 600;
+            color: #111827;
+        }
+
+        .percentage-bar {
+            height: 6px;
+            background: #e5e7eb;
+            border-radius: 3px;
+            margin-top: 4px;
+            overflow: hidden;
+        }
+
+        .percentage-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #3b82f6, #1d4ed8);
+            border-radius: 3px;
+        }
+
+        .no-data {
+            text-align: center;
+            padding: 40px 20px;
+            color: #9ca3af;
+        }
+
+        .no-data i {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            opacity: 0.5;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px 20px;
+            color: #6b7280;
+        }
+
+        .loading-spinner {
+            border: 3px solid #f3f4f6;
+            border-top: 3px solid #3b82f6;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .footer {
+            text-align: center;
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 0.875rem;
+            padding: 20px;
+            margin-top: auto;
+        }
+
+        .notification {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 12px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            z-index: 3000;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        .notification.success {
+            background-color: #10b981;
+            color: white;
+        }
+
+        .notification.error {
+            background-color: #ef4444;
+            color: white;
+        }
+
+        .notification.info {
+            background-color: #3b82f6;
+            color: white;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideOut {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+
+            to {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 12px;
+                background: #1e3a8a;
+            }
+
+            .container {
+                gap: 16px;
+            }
+
+            .header {
+                padding: 16px;
+                border-radius: 12px;
+            }
+
+            .header h1 {
+                font-size: 1.5rem;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+
+            .form-section {
+                padding: 20px;
+            }
+
+            .main-content {
+                flex-direction: column;
+                height: auto;
+            }
+
+            .data-section {
+                max-height: 400px;
+                min-height: 400px;
+                padding: 5px;
+            }
+
+            .data-header h2 {
+                font-size: 1.3rem;
+            }
+
+            .stat-value {
+                font-size: 1.5rem;
+            }
+
+            .stat-row {
+                flex-direction: column;
+                margin-bottom: 12px;
+            }
+
+            .filter-select {
+                min-width: 120px;
+            }
+
+            .btn {
+                padding: 10px 20px;
+                font-size: 0.9rem;
+            }
+        }
+
+        @media (min-width: 1200px) {
+            .data-section {
+                max-height: 65vh;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>「HKDSE成績分析」查詢系統</h1>
+            <p class="subtitle">資料來源：香港考試及評核局 (HKEAA)</p>
+        </header>
+        <section class="form-section">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="searchSubject">
+                        <i class="fas fa-search"></i>
+                        搜尋科目
+                    </label>
+                    <div class="search-group">
+                        <input type="text" id="searchSubject" class="form-control search-input"
+                            placeholder="輸入科目名稱或類別...">
+                        <button type="button" class="btn btn-primary" onclick="searchSubjects()">
+                            <i class="fas fa-search"></i>
+                            搜尋
+                        </button>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="yearSelect">
+                        <i class="fas fa-calendar-alt"></i>
+                        選擇年份
+                    </label>
+                    <select id="yearSelect" class="form-control" onchange="loadSelectedYearData()">
+                        <option value="2024">2024年</option>
+                        <option value="2023">2023年</option>
+                        <option value="2022">2022年</option>
+                        <option value="2021">2021年</option>
+                        <!-- <option value="2020">2020年</option> -->
+                        <!-- <option value="2019">2019年</option> -->
+                        <!-- <option value="2018">2018年</option> -->
+                        <!-- <option value="2017">2017年</option> -->
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="dataCategory">
+                        <i class="fas fa-list"></i>
+                        科目大類
+                    </label>
+                    <select id="dataCategory" class="form-control" onchange="updateFilters()">
+                        <option value="all">所有類別</option>
+                        <option value="category_a">甲類科目 (學術科目)</option>
+                        <option value="category_b">乙類科目 (應用學習)</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-actions">
+                <button type="button" class="btn btn-secondary" onclick="loadAllData()">
+                    <i class="fas fa-sync-alt"></i>
+                    載入所有資料
+                </button>
+                <button type="button" class="btn btn-secondary" onclick="resetForm()">
+                    <i class="fas fa-redo"></i>
+                    重置
+                </button>
+            </div>
+        </section>
+        <main class="main-content">
+            <section class="data-section">
+                <div class="data-header">
+                    <h2>HKDSE成績數據</h2>
+                    <p class="subtitle">點擊科目查看詳細成績分析</p>
+                </div>
+                <div class="data-stats">
+                    <div class="stat-item">
+                        <span id="total-subjects" class="stat-value">0</span>
+                        <span class="stat-label">顯示科目數</span>
+                    </div>
+                    <div class="stat-item">
+                        <span id="total-candidates" class="stat-value">0</span>
+                        <span class="stat-label">報考總數</span>
+                    </div>
+                    <div class="stat-item">
+                        <span id="total-datasets" class="stat-value">0</span>
+                        <span class="stat-label">數據集數量</span>
+                    </div>
+                    <div class="stat-item">
+                        <span id="current-data-type" class="stat-value">數值</span>
+                        <span class="stat-label">顯示數據類型</span>
+                    </div>
+                </div>
+                <div class="filter-section">
+                    <div class="filter-row">
+                        <span class="filter-label">性別：</span>
+                        <select id="filterGender" class="filter-select" onchange="applyFilters()">
+                            <option value="all">所有性別</option>
+                            <option value="Male">男生</option>
+                            <option value="Female">女生</option>
+                            <option value="Total">總計</option>
+                        </select>
+                    </div>
+                    <div class="filter-row">
+                        <span class="filter-label">科目類別：</span>
+                        <select id="filterSubjectCategory" class="filter-select" onchange="applyFilters()">
+                            <option value="all">所有科目類別</option>
+                        </select>
+                    </div>
+                    <div class="filter-row">
+                        <span class="filter-label">數據類型：</span>
+                        <div class="data-type-toggle">
+                            <button class="data-type-btn active" onclick="setDataType('Number')">數值 (人數)</button>
+                            <button class="data-type-btn" onclick="setDataType('Percentage')">百分比</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="accordion-container" id="accordion-container">
+                    <div class="no-data">
+                        <i class="fas fa-graduation-cap"></i>
+                        <p>請選擇年份並點擊「載入所有資料」按鈕開始查詢</p>
+                    </div>
+                </div>
+            </section>
+        </main>
+        <footer class="footer">
+            <p>「HKDSE成績分析」查詢系統<br />資料來源: 香港考試及評核局 (HKEAA)</p>
+        </footer>
+    </div>
+    <script>
+        // 使用替代的 CORS 代理
+        const PROXY_URL = 'https://cors-anywhere.herokuapp.com';
+        const BASE_URL = 'https://www.hkeaa.edu.hk/DocLibrary/HKDSE/Exam_Report/Examination_Statistics';
+        // IndexedDB 配置
+        const DB_NAME = 'hkdse-results-db';
+        const DB_VERSION = 4;
+        const STORE_NAME = 'hkdseResults';
+        // 科目類別映射
+        const subjectCategoryMap = {
+            // 乙類科目類別 (Category B)
+            'Applied Learning (Vocational English)': '應用學習(職業英語)',
+            'Applied Science': '應用科學',
+            'Business, Management and Law': '商業、管理及法律',
+            'Creative Studies': '創意學習',
+            'Engineering and Production': '工程及生產',
+            'Media and Communication': '媒體及傳意',
+            'Services': '服務',
+            '': '其他',
+            // 甲類科目類別 (Category A)
+            'Biology': '生物',
+            'Business, Accounting and Financial Studies': '企業、會計與財務概論',
+            'Chemistry': '化學',
+            'Chinese History': '中國歷史',
+            'Chinese Language': '中國語文',
+            'Chinese Literature': '中國文學',
+            'Design and Applied Technology': '設計與應用科技',
+            'Economics': '經濟',
+            'English Language': '英國語文',
+            'Ethics and Religious Studies': '倫理與宗教',
+            'Geography': '地理',
+            'Health Management and Social Care': '健康管理與社會關懷',
+            'History': '歷史',
+            'Information and Communication Technology': '資訊及通訊科技',
+            'Literature in English': '英國文學',
+            'Mathematics': '數學',
+            'Music': '音樂',
+            'Physical Education': '體育',
+            'Physics': '物理',
+            'Technology and Living': '科技與生活',
+            'Tourism and Hospitality Studies': '旅遊與款待',
+            'Visual Arts': '視覺藝術',
+            'All Category A subjects# (except Citizenship and Social Development)': '所有甲類科目',
+            'All Category B subjects (except Applied Learning Chinese)': '所有乙類科目'
+        };
+        // 甲類科目子集
+        const categoryASubjects = [
+            'Biology', 'Business, Accounting and Financial Studies', 'Chemistry',
+            'Chinese History', 'Chinese Language', 'Chinese Literature',
+            'Design and Applied Technology', 'Economics', 'English Language',
+            'Ethics and Religious Studies', 'Geography', 'Health Management and Social Care',
+            'History', 'Information and Communication Technology', 'Literature in English',
+            'Mathematics', 'Music', 'Physical Education', 'Physics',
+            'Technology and Living', 'Tourism and Hospitality Studies', 'Visual Arts'
+        ];
+        // 乙類科目子集
+        const categoryBSubjects = [
+            'Applied Learning (Vocational English)', 'Applied Science',
+            'Business, Management and Law', 'Creative Studies',
+            'Engineering and Production', 'Media and Communication', 'Services'
+        ];
+        // 全局變量
+        let allData = {
+            '2024': { 'category_a': [], 'category_b': [] },
+            '2023': { 'category_a': [], 'category_b': [] },
+            '2022': { 'category_a': [], 'category_b': [] },
+            '2021': { 'category_a': [], 'category_b': [] },
+            // '2020': { 'category_a': [], 'category_b': [] },
+            // '2019': { 'category_a': [], 'category_b': [] },
+            // '2018': { 'category_a': [], 'category_b': [] },
+            // '2017': { 'category_a': [], 'category_b': [] }
+        };
+        let currentData = [];
+        let filteredData = [];
+        let db;
+        let activeSubject = null;
+        let currentDataType = 'Number';
+
+        // CSV 文件名稱映射（根據年份）
+        const csvFileNames = {
+            '2024': { 'category_a': 'table5a_1_en.csv', 'category_b': 'table5c_1_en.csv' },
+            '2023': { 'category_a': 'table5a_en.csv', 'category_b': 'table5c_1_en.csv' },
+            '2022': { 'category_a': 'table5a_en.csv', 'category_b': 'table5c_1_en.csv' },
+            '2021': { 'category_a': 'table5a_en.csv', 'category_b': 'table5c_1_en.csv' },
+            '2020': { 'category_a': 'table5a_en.csv', 'category_b': 'table5c_1_en.csv' },
+            '2019': { 'category_a': 'table5a_en.csv', 'category_b': 'table5c_1_en.csv' },
+            '2018': { 'category_a': 'table5a_en.csv', 'category_b': 'table5c_1_en.csv' },
+            '2017': { 'category_a': 'table5a_en.csv', 'category_b': 'table5c_en.csv' }
+        };
+        // 科目類別選項
+        const subjectCategories = {
+            'category_a': categoryASubjects,
+            'category_b': categoryBSubjects
+        };
+        // 初始化應用
+        document.addEventListener('DOMContentLoaded', function () {
+            initIndexedDB();
+            document.getElementById('searchSubject').addEventListener('keypress', function (e) {
+                if (e.key === 'Enter') searchSubjects();
+            });
+            initFilterOptions();
+        });
+        // 初始化篩選器選項
+        function initFilterOptions() {
+            const categoryFilter = document.getElementById('filterSubjectCategory');
+            categoryFilter.innerHTML = '<option value="all">所有科目類別</option>';
+            // 合併甲類和乙類科目
+            const allSubjects = [...categoryASubjects, ...categoryBSubjects];
+            allSubjects.forEach(subject => {
+                const option = document.createElement('option');
+                const chineseName = subjectCategoryMap[subject] || subject;
+                option.value = subject;
+                option.textContent = chineseName;
+                categoryFilter.appendChild(option);
+            });
+        }
+        // 初始化 IndexedDB
+        function initIndexedDB() {
+            const request = indexedDB.open(DB_NAME, DB_VERSION);
+            request.onerror = function (event) {
+                console.error('IndexedDB 初始化失敗:', event.target.error);
+                showNotification('瀏覽器資料庫初始化失敗', 'error');
+            };
+            request.onsuccess = function (event) {
+                db = event.target.result;
+                console.log('IndexedDB 初始化成功');
+                checkAndLoadData();
+            };
+            request.onupgradeneeded = function (event) {
+                const db = event.target.result;
+                if (!db.objectStoreNames.contains(STORE_NAME)) {
+                    const store = db.createObjectStore(STORE_NAME, { keyPath: 'id' });
+                    store.createIndex('year', 'year', { unique: false });
+                    store.createIndex('category', 'category', { unique: false });
+                    store.createIndex('subject', 'subject', { unique: false });
+                    store.createIndex('type', 'type', { unique: false });
+                }
+            };
+        }
+        // 檢查並載入資料
+        async function checkAndLoadData() {
+            const selectedYear = document.getElementById('yearSelect').value;
+            const category = document.getElementById('dataCategory').value;
+            try {
+                const hasCachedData = await checkCachedData(selectedYear, category);
+                if (hasCachedData) {
+                    loadFromIndexedDB(selectedYear, category);
+                } else {
+                    loadFromAPI(selectedYear, category);
+                }
+            } catch (error) {
+                console.error('檢查緩存數據時出錯:', error);
+                showNotification('載入數據時發生錯誤，請刷新頁面重試', 'error');
+            }
+        }
+        // 檢查緩存數據
+        async function checkCachedData(year, category) {
+            if (!db) return false;
+            return new Promise((resolve, reject) => {
+                const transaction = db.transaction([STORE_NAME], 'readonly');
+                const store = transaction.objectStore(STORE_NAME);
+                const index = store.index('year');
+                const request = index.count(year);
+                request.onsuccess = function (event) {
+                    resolve(event.target.result > 0);
+                };
+                request.onerror = function (event) {
+                    console.error('檢查緩存數據失敗:', event.target.error);
+                    resolve(false);
+                };
+            });
+        }
+        async function loadFromAPI(year, category) {
+            const container = document.getElementById('accordion-container');
+            container.innerHTML = `
+        <div class="loading">
+            <div class="loading-spinner"></div>
+            <p>正在從伺服器載入資料...</p>
+        </div>
+    `;
+
+            try {
+                let tableAUrl, tableBUrl;
+                // 根據年份獲取文件名
+                const fileNames = csvFileNames[year];
+                if (!fileNames) {
+                    showNotification(`找不到 ${year} 年的數據文件`, 'error');
+                    container.innerHTML = `
+                <div class="no-data">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <p>${year} 年的數據暫時無法獲取</p>
+                    <p style="font-size: 0.9rem; margin-top: 10px;">請選擇其他年份</p>
+                </div>
+            `;
+                    return;
+                }
+
+                const fileNameA = fileNames['category_a'];
+                const fileNameB = fileNames['category_b'];
+
+                tableAUrl = `${PROXY_URL}/${BASE_URL}/${year}_HKDSE_analysis_of_results_of_candidates_${fileNameA}`;
+                tableBUrl = `${PROXY_URL}/${BASE_URL}/${year}_HKDSE_analysis_of_results_of_candidates_${fileNameB}`;
+
+                console.log('載入URL:', tableAUrl, tableBUrl);
+
+                // 設置 CORS 請求頭
+                const fetchOptions = {
+                    headers: {
+                        'Origin': window.location.origin,
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    mode: 'cors'
+                };
+
+                const [tableAData, tableBData] = await Promise.all([
+                    fetchCSVData(tableAUrl, 'a', year, fetchOptions),
+                    fetchCSVData(tableBUrl, 'b', year, fetchOptions)
+                ]);
+
+                const processedData = [...tableAData, ...tableBData];
+
+                if (processedData.length === 0) {
+                    throw new Error('無法載入數據或數據為空');
+                }
+
+                await saveToIndexedDB(processedData);
+
+                // 計算並存儲總考生數
+                let totalCandidates = 0;
+                const aggregateData = processedData.filter(item =>
+                    item && item.isAggregate && item.gender === 'Total' && item.type === 'Number'
+                );
+
+                aggregateData.forEach(item => {
+                    if (item.category === 'a') {
+                        totalCandidates += parseNumber(item['No. Sat'] || item['No. of candidates sat'] || 0);
+                    } else if (item.category === 'b') {
+                        totalCandidates += parseNumber(item['No. of candidates fulfilling attendance requirement'] || 0);
+                    }
+                });
+
+                // 將數據分配到對應的類別，並保存總考生數
+                allData[year] = {
+                    'category_a': processedData.filter(item => item.category === 'a'),
+                    'category_b': processedData.filter(item => item.category === 'b'),
+                    'total_counter': totalCandidates > 0 ? totalCandidates : null
+                };
+
+                loadSelectedData(year, category);
+                updateStatistics(); // 新增：更新統計數據
+                showNotification(`成功載入 ${processedData.length} 筆資料${totalCandidates > 0 ? `，考生總數：${totalCandidates.toLocaleString()}` : ''}`, 'success');
+
+            } catch (error) {
+                console.error('載入數據時出錯:', error);
+                container.innerHTML = `
+            <div class="no-data">
+                <i class="fas fa-exclamation-triangle"></i>
+                <p>載入資料時出錯</p>
+                <p style="font-size: 0.9rem; margin-top: 10px;">${error.message}</p>
+                <p style="font-size: 0.9rem; margin-top: 10px;">請確認已啟用 CORS 代理服務或選擇其他年份</p>
+                <button type="button" class="btn btn-primary" style="margin-top: 10px;" onclick="checkAndLoadData()">
+                    <i class="fas fa-redo"></i>
+                    重試載入
+                </button>
+            </div>
+        `;
+                showNotification('載入資料時出錯，請稍後再試', 'error');
+            }
+        }
+
+        // 從 IndexedDB 載入數據
+        async function loadFromIndexedDB(year, category) {
+            const container = document.getElementById('accordion-container');
+            container.innerHTML = `
+                <div class="loading">
+                    <div class="loading-spinner"></div>
+                    <p>正在從本地緩存載入資料...</p>
+                </div>
+            `;
+            try {
+                const transaction = db.transaction([STORE_NAME], 'readonly');
+                const store = transaction.objectStore(STORE_NAME);
+                const index = store.index('year');
+                const request = index.getAll(year);
+                request.onsuccess = function (event) {
+                    const data = event.target.result;
+                    if (data.length === 0) {
+                        loadFromAPI(year, category);
+                        return;
+                    }
+                    // 將數據分配到對應的類別
+                    allData[year] = {
+                        'category_a': data.filter(item => item.category === 'a'),
+                        'category_b': data.filter(item => item.category === 'b')
+                    };
+                    loadSelectedData(year, category);
+                    updateStatistics(); // 新增：更新統計數據
+                    showNotification(`已從本地緩存載入 ${data.length} 筆資料`, 'success');
+                };
+                request.onerror = function (event) {
+                    console.error('從 IndexedDB 讀取數據失敗:', event.target.error);
+                    loadFromAPI(year, category);
+                };
+            } catch (error) {
+                console.error('載入緩存數據時出錯:', error);
+                loadFromAPI(year, category);
+            }
+        }
+        // 從 API 載入數據
+        async function loadFromIndexedDB(year, category) {
+            const container = document.getElementById('accordion-container');
+            container.innerHTML = `
+        <div class="loading">
+            <div class="loading-spinner"></div>
+            <p>正在從本地緩存載入資料...</p>
+        </div>
+    `;
+
+            try {
+                const transaction = db.transaction([STORE_NAME], 'readonly');
+                const store = transaction.objectStore(STORE_NAME);
+                const index = store.index('year');
+                const request = index.getAll(year);
+
+                request.onsuccess = function (event) {
+                    const data = event.target.result;
+                    if (data.length === 0) {
+                        loadFromAPI(year, category);
+                        return;
+                    }
+
+                    // 計算總考生數
+                    let totalCandidates = 0;
+                    const aggregateData = data.filter(item =>
+                        item && item.isAggregate && item.gender === 'Total' && item.type === 'Number'
+                    );
+
+                    aggregateData.forEach(item => {
+                        if (item.category === 'a') {
+                            totalCandidates += parseNumber(item['No. Sat'] || item['No. of candidates sat'] || 0);
+                        } else if (item.category === 'b') {
+                            totalCandidates += parseNumber(item['No. of candidates fulfilling attendance requirement'] || 0);
+                        }
+                    });
+
+                    // 將數據分配到對應的類別，並保存總考生數
+                    allData[year] = {
+                        'category_a': data.filter(item => item.category === 'a'),
+                        'category_b': data.filter(item => item.category === 'b'),
+                        'total_counter': totalCandidates > 0 ? totalCandidates : null
+                    };
+
+                    loadSelectedData(year, category);
+                    updateStatistics(); // 新增：更新統計數據
+                    showNotification(`已從本地緩存載入 ${data.length} 筆資料${totalCandidates > 0 ? `，考生總數：${totalCandidates.toLocaleString()}` : ''}`, 'success');
+                };
+
+                request.onerror = function (event) {
+                    console.error('從 IndexedDB 讀取數據失敗:', event.target.error);
+                    loadFromAPI(year, category);
+                };
+            } catch (error) {
+                console.error('載入緩存數據時出錯:', error);
+                loadFromAPI(year, category);
+            }
+        }
+        // 載入 CSV 數據
+        async function fetchCSVData(url, category, year, options = {}) {
+            try {
+                console.log('正在載入:', url);
+                const response = await fetch(url, options);
+                if (!response.ok) {
+                    if (response.status === 403 || response.status === 0) {
+                        throw new Error('CORS代理服務暫時無法訪問，請稍後再試或訪問代理網站授權');
+                    }
+                    throw new Error(`HTTP錯誤! 狀態碼: ${response.status}`);
+                }
+                const csvText = await response.text();
+                console.log('CSV數據載入成功，長度:', csvText.length);
+                return parseCSV(csvText, category, year);
+            } catch (error) {
+                console.error(`載入 CSV 數據失敗 (${url}):`, error);
+                // 返回空數組而不是拋出錯誤，讓其他類別的數據仍然可以載入
+                return [];
+            }
+        }
+        // 解析 CSV 數據
+        function parseCSV(csvText, category, year) {
+            const lines = csvText.split('\n');
+            if (lines.length < 2) return [];
+            const headers = lines[0].split(',').map(h => h.trim());
+            const data = [];
+            for (let i = 1; i < lines.length; i++) {
+                const line = lines[i].trim();
+                if (!line) continue;
+                const values = parseCSVLine(line);
+                if (values.length === headers.length) {
+                    const row = {};
+                    headers.forEach((header, index) => {
+                        let value = values[index];
+                        if (value === '' || value === '-' || value === 'N/A' || value === 'NA') {
+                            value = null;
+                        }
+                        row[header] = value;
+                    });
+                    const processedRow = processRowData(row, category, year);
+                    if (processedRow) {
+                        data.push(processedRow);
+                    }
+                }
+            }
+            console.log(`解析了 ${data.length} 行數據 (${category}, ${year})`);
+            return data;
+        }
+        // 解析 CSV 行（處理引號內的逗號）
+        function parseCSVLine(line) {
+            const values = [];
+            let current = '';
+            let inQuotes = false;
+            for (let i = 0; i < line.length; i++) {
+                const char = line[i];
+                if (char === '"') {
+                    inQuotes = !inQuotes;
+                } else if (char === ',' && !inQuotes) {
+                    values.push(current.trim());
+                    current = '';
+                } else {
+                    current += char;
+                }
+            }
+            values.push(current.trim());
+            return values;
+        }
+        // 處理行數據
+        function processRowData(row, category, year) {
+            // 不再排除匯總行
+            if (!row.Subject || row.Subject === '' || row.Subject === 'Subject') {
+                return null;
+            }
+
+            const subject = row.Subject ? row.Subject.trim() : '';
+            const subject_2 = row.Subject_2 ? row.Subject_2.trim() : '';
+            const gender = row.Gender ? row.Gender.trim() : '';
+            const type = row.Type ? row.Type.trim() : '';
+
+            if (!subject || !gender || !type) {
+                return null;
+            }
+
+            // 檢查是否為匯總行
+            const isAggregate = subject.includes('All Category');
+
+            // 創建唯一的ID，確保每個科目組合都唯一
+            const id = `${year}-${category}-${subject}-${subject_2 || 'main'}-${gender}-${type}`;
+            const processedData = {
+                id: id,
+                year: year,
+                category: category,
+                subject: subject,
+                subject_2: subject_2,
+                gender: gender,
+                type: type,
+                isAggregate: isAggregate, // 標記是否為匯總行
+                // 複製所有原始數據字段
+                ...row
+            };
+
+            return processedData;
+        }
+        // 解析數字 - 修復錯誤：添加類型檢查
+        function parseNumber(value) {
+            if (value === null || value === undefined) return 0;
+            if (typeof value === 'number') {
+                return isNaN(value) ? 0 : value;
+            }
+            if (typeof value === 'string') {
+                // 移除所有非數字字符，除了小數點和負號
+                const cleaned = value.replace(/[^\d.-]/g, '');
+                if (cleaned === '' || cleaned === '-') return 0;
+                const num = parseFloat(cleaned);
+                return isNaN(num) ? 0 : num;
+            }
+            // 嘗試轉換為數字
+            const num = Number(value);
+            return isNaN(num) ? 0 : num;
+        }
+        // 解析百分比 - 修復錯誤：添加類型檢查
+        function parsePercentage(value) {
+            if (value === null || value === undefined) return 0;
+            if (typeof value === 'number') {
+                return isNaN(value) ? 0 : value;
+            }
+            if (typeof value === 'string') {
+                const cleaned = value.replace(/[^\d.-]/g, '');
+                if (cleaned === '' || cleaned === '-') return 0;
+                const num = parseFloat(cleaned);
+                // 檢查是否可能是百分比符號結尾
+                if (value.includes('%')) {
+                    return num; // 已經是百分比
+                }
+                // 百分比值通常介於 0-100，但檢查是否可能是小數格式（如 0.95）
+                if (num <= 1 && num >= 0 && !value.includes('.')) {
+                    return num * 100; // 如果是小數格式，轉換為百分比
+                }
+                return isNaN(num) ? 0 : num;
+            }
+            const num = Number(value);
+            return isNaN(num) ? 0 : num;
+        }
+        // 儲存到 IndexedDB
+        async function saveToIndexedDB(data) {
+            if (!db) return;
+            return new Promise((resolve, reject) => {
+                const transaction = db.transaction([STORE_NAME], 'readwrite');
+                const store = transaction.objectStore(STORE_NAME);
+                // 清除現有年份數據
+                const year = data[0]?.year;
+                if (year) {
+                    const index = store.index('year');
+                    const request = index.openCursor(year);
+                    request.onsuccess = function (event) {
+                        const cursor = event.target.result;
+                        if (cursor) {
+                            store.delete(cursor.primaryKey);
+                            cursor.continue();
+                        } else {
+                            data.forEach(item => store.put(item));
+                        }
+                    };
+                } else {
+                    data.forEach(item => store.put(item));
+                }
+                transaction.oncomplete = function () {
+                    console.log('數據已儲存到 IndexedDB');
+                    resolve();
+                };
+                transaction.onerror = function (event) {
+                    console.error('儲存到 IndexedDB 失敗:', event.target.error);
+                    reject(event.target.error);
+                };
+            });
+        }
+        // 載入選擇的數據
+        function loadSelectedData(year, category) {
+            let dataToLoad = [];
+            if (category === 'all') {
+                dataToLoad = [...(allData[year]?.['category_a'] || []), ...(allData[year]?.['category_b'] || [])];
+            } else if (category === 'category_a') {
+                dataToLoad = allData[year]?.['category_a'] || [];
+            } else if (category === 'category_b') {
+                dataToLoad = allData[year]?.['category_b'] || [];
+            }
+            currentData = dataToLoad;
+            applyFilters();
+            updateStatistics(); // 確保統計被更新
+        }
+        // 設置數據類型
+        function setDataType(type) {
+            currentDataType = type;
+            document.querySelectorAll('.data-type-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            document.getElementById('current-data-type').textContent = type === 'Number' ? '數值 (人數)' : '百分比';
+            applyFilters();
+            updateStatistics(); // 新增：切換數據類型後更新統計
+        }
+        // 應用篩選
+        function applyFilters() {
+            const year = document.getElementById('yearSelect').value;
+            const category = document.getElementById('dataCategory').value;
+            const genderFilter = document.getElementById('filterGender').value;
+            const categoryFilter = document.getElementById('filterSubjectCategory').value;
+            const searchTerm = document.getElementById('searchSubject').value.trim().toLowerCase();
+
+            // 根據選擇的大類獲取數據
+            let dataToFilter = [];
+            if (category === 'all') {
+                dataToFilter = [...(allData[year]?.['category_a'] || []), ...(allData[year]?.['category_b'] || [])];
+            } else if (category === 'category_a') {
+                dataToFilter = allData[year]?.['category_a'] || [];
+            } else if (category === 'category_b') {
+                dataToFilter = allData[year]?.['category_b'] || [];
+            }
+
+            // 應用所有篩選器
+            filteredData = dataToFilter.filter(item => {
+                if (!item) return false;
+                // 數據類型篩選
+                if (item.type !== currentDataType) return false;
+                // 性別篩選
+                if (genderFilter !== 'all' && item.gender !== genderFilter) return false;
+                // 科目類別篩選
+                if (categoryFilter !== 'all' && item.subject !== categoryFilter) return false;
+                // 關鍵字搜尋
+                if (searchTerm) {
+                    const subjectName = item.subject?.toLowerCase() || '';
+                    const subject2 = (item.subject_2 || '').toLowerCase();
+                    const chineseName = subjectCategoryMap[item.subject] || '';
+                    if (!subjectName.includes(searchTerm) &&
+                        !subject2.includes(searchTerm) &&
+                        !chineseName.toLowerCase().includes(searchTerm)) {
+                        return false;
+                    }
+                }
+                return true;
+            });
+            updateStatistics();
+            updateSubjectList();
+        }
+        // 載入選擇年份的數據
+        function loadSelectedYearData() {
+            const year = document.getElementById('yearSelect').value;
+            const category = document.getElementById('dataCategory').value;
+            const categoryKey = category === 'all' ? 'category_a' : category.split('_')[1];
+
+            // 初始化該年份的數據結構（如果不存在）
+            if (!allData[year]) {
+                allData[year] = { 'category_a': [], 'category_b': [] };
+            }
+
+            if (allData[year] && allData[year][categoryKey] && allData[year][categoryKey].length > 0) {
+                loadSelectedData(year, category);
+                updateStatistics(); // 新增：切換年份後更新統計
+                showNotification(`已顯示 ${year} 年 ${getCategoryName(category)} 資料`, 'info');
+            } else {
+                checkAndLoadData();
+            }
+        }
+        // 獲取類別名稱
+        function getCategoryName(category) {
+            const names = {
+                'all': '所有類別',
+                'category_a': '甲類科目',
+                'category_b': '乙類科目'
+            };
+            return names[category] || category;
+        }
+        // 重置表單
+        function resetForm() {
+            document.getElementById('searchSubject').value = '';
+            document.getElementById('filterGender').value = 'all';
+            document.getElementById('filterSubjectCategory').value = 'all';
+            // 重置數據類型為數值
+            currentDataType = 'Number';
+            document.querySelectorAll('.data-type-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.textContent.includes('數值')) {
+                    btn.classList.add('active');
+                }
+            });
+            document.getElementById('current-data-type').textContent = '數值 (人數)';
+            applyFilters();
+            updateStatistics(); // 新增：重置後更新統計
+            showNotification('已重置搜尋條件', 'info');
+        }
+        // 載入所有資料
+        function loadAllData() {
+            const year = document.getElementById('yearSelect').value;
+            const category = document.getElementById('dataCategory').value;
+            const categoryKey = category === 'all' ? 'category_a' : category.split('_')[1];
+
+            // 初始化該年份的數據結構（如果不存在）
+            if (!allData[year]) {
+                allData[year] = { 'category_a': [], 'category_b': [] };
+            }
+
+            if (allData[year] && allData[year][categoryKey] && allData[year][categoryKey].length === 0) {
+                checkAndLoadData();
+            } else {
+                loadSelectedData(year, category);
+                updateStatistics(); // 新增：確保統計被更新
+                showNotification(`已顯示 ${filteredData.length} 筆資料`, 'info');
+            }
+        }
+        // 搜尋科目
+        function searchSubjects() {
+            applyFilters();
+            updateStatistics(); // 新增：搜尋後更新統計
+            if (filteredData.length === 0) {
+                showNotification('未找到符合搜尋條件的科目', 'info');
+            } else {
+                showNotification(`找到 ${filteredData.length} 個符合搜尋條件的科目`, 'success');
+            }
+        }
+        // 更新篩選器
+        function updateFilters() {
+            loadSelectedYearData();
+            updateStatistics(); // 新增：更新篩選器後更新統計
+        }
+        // 更新統計數據 - 修復計算邏輯
+        function updateStatistics() {
+            if (!filteredData || filteredData.length === 0) {
+                document.getElementById('total-subjects').textContent = '0';
+                document.getElementById('total-candidates').textContent = '0';
+                document.getElementById('total-datasets').textContent = '0';
+                return;
+            }
+
+            // 計算顯示的科目數量 - 只計算非匯總行的科目
+            const uniqueSubjects = new Set();
+            let totalCandidates = 0;
+
+            // 首先嘗試從匯總行獲取總考生數
+            const currentYear = document.getElementById('yearSelect').value;
+            const currentCategory = document.getElementById('dataCategory').value;
+
+            // 獲取當前年份的所有數據（未過濾）
+            let allYearData = [];
+            if (currentCategory === 'all') {
+                allYearData = [...(allData[currentYear]?.['category_a'] || []),
+                ...(allData[currentYear]?.['category_b'] || [])];
+            } else if (currentCategory === 'category_a') {
+                allYearData = allData[currentYear]?.['category_a'] || [];
+            } else if (currentCategory === 'category_b') {
+                allYearData = allData[currentYear]?.['category_b'] || [];
+            }
+
+            // 尋找匯總行數據
+            const aggregateData = allYearData.filter(item =>
+                item && item.isAggregate && item.gender === 'Total' && item.type === 'Number'
+            );
+
+            if (aggregateData.length > 0) {
+                // 從匯總行計算考生總數
+                aggregateData.forEach(item => {
+                    let candidateCount = 0;
+
+                    if (item.category === 'a') {
+                        // 甲類科目匯總
+                        candidateCount = parseNumber(item['No. Sat'] || item['No. of candidates sat'] || 0);
+                    } else if (item.category === 'b') {
+                        // 乙類科目匯總
+                        candidateCount = parseNumber(item['No. of candidates fulfilling attendance requirement'] || 0);
+                    }
+
+                    if (candidateCount > 0) {
+                        totalCandidates += candidateCount;
+                    }
+                });
+            } else {
+                // 如果沒有匯總行，嘗試估算
+                // 注意：這只是一個估算，可能不準確
+                const uniqueCandidateSubjects = new Set();
+                const candidateCounts = new Map();
+
+                allYearData.forEach(item => {
+                    if (!item || item.isAggregate || item.type !== 'Number' || item.gender !== 'Total') {
+                        return;
+                    }
+
+                    const subjectKey = item.subject;
+                    if (!uniqueCandidateSubjects.has(subjectKey)) {
+                        uniqueCandidateSubjects.add(subjectKey);
+
+                        let subjectCandidateCount = 0;
+                        if (item.category === 'a') {
+                            subjectCandidateCount = parseNumber(item['No. Sat'] || item['No. of candidates sat'] || 0);
+                        } else if (item.category === 'b') {
+                            subjectCandidateCount = parseNumber(item['No. of candidates fulfilling attendance requirement'] || 0);
+                        }
+
+                        if (subjectCandidateCount > 0) {
+                            // 這不是準確的總考生數，但可以作為參考
+                            candidateCounts.set(subjectKey, subjectCandidateCount);
+                        }
+                    }
+                });
+
+                // 計算平均值作為估算（這只是一個近似值）
+                if (candidateCounts.size > 0) {
+                    const countsArray = Array.from(candidateCounts.values());
+                    const avgCandidates = Math.round(countsArray.reduce((a, b) => a + b, 0) / countsArray.length);
+                    // 顯示估算值並添加提示
+                    totalCandidates = avgCandidates * uniqueCandidateSubjects.size;
+                }
+            }
+
+            // 計算顯示的科目數量（排除匯總行）
+            filteredData.forEach(item => {
+                if (!item || !item.subject) return;
+
+                // 只添加非匯總行的科目名稱
+                if (item.subject && !item.isAggregate) {
+                    uniqueSubjects.add(item.subject);
+                }
+            });
+
+            const totalSubjects = uniqueSubjects.size;
+
+            // 數據集數量 - 計算不同類型的數據集數量
+            const currentGender = document.getElementById('filterGender').value;
+            const currentSubjectFilter = document.getElementById('filterSubjectCategory').value;
+            const searchTerm = document.getElementById('searchSubject').value.trim().toLowerCase();
+
+            const filteredSource = allYearData.filter(item => {
+                if (!item) return false;
+                if (currentGender !== 'all' && item.gender !== currentGender) return false;
+                if (currentSubjectFilter !== 'all' && item.subject !== currentSubjectFilter) return false;
+                if (searchTerm) {
+                    const subjectName = item.subject?.toLowerCase() || '';
+                    const subject2 = (item.subject_2 || '').toLowerCase();
+                    const chineseName = subjectCategoryMap[item.subject] || '';
+                    if (!subjectName.includes(searchTerm) &&
+                        !subject2.includes(searchTerm) &&
+                        !chineseName.toLowerCase().includes(searchTerm)) {
+                        return false;
+                    }
+                }
+                return true;
+            });
+
+            // 統計不同的數據類型組合
+            const dataTypeSet = new Set();
+            filteredSource.forEach(item => {
+                if (item && item.type && item.gender) {
+                    const key = `${item.type}|${item.gender}`;
+                    dataTypeSet.add(key);
+                }
+            });
+
+            // 顯示結果
+            document.getElementById('total-subjects').textContent = totalSubjects.toLocaleString();
+
+            if (totalCandidates > 0) {
+                // 檢查是否有匯總行數據
+                const hasAggregateData = aggregateData.length > 0;
+                document.getElementById('total-candidates').textContent = totalCandidates.toLocaleString();
+
+                if (!hasAggregateData) {
+                    // 如果沒有匯總行數據，顯示估算提示
+                    document.getElementById('total-candidates').title = '注意：這是估算值。考生總數應從匯總行數據獲取。';
+                    document.getElementById('total-candidates').style.color = '#f59e0b'; // 橙色提示
+                } else {
+                    document.getElementById('total-candidates').title = '';
+                    document.getElementById('total-candidates').style.color = '';
+                }
+            } else {
+                document.getElementById('total-candidates').textContent = 'N/A';
+                document.getElementById('total-candidates').title = '無法從數據中獲取考生總數。';
+                document.getElementById('total-candidates').style.color = '#dc2626'; // 紅色提示
+            }
+
+            document.getElementById('total-datasets').textContent = dataTypeSet.size;
+        }
+        // 更新科目列表 - 按照 Type -> Gender -> {甲類學科的科目, 甲類學科的科目 (細部)} -> Subject -> Subject_2 分組
+        function updateSubjectList() {
+            const container = document.getElementById('accordion-container');
+
+            // 過濾掉匯總行
+            const displayData = filteredData.filter(item => !item.isAggregate);
+
+            if (!displayData || displayData.length === 0) {
+                container.innerHTML = `
+            <div class="no-data">
+                <i class="fas fa-graduation-cap"></i>
+                <p>沒有找到科目資料</p>
+                <p style="font-size: 0.9rem; margin-top: 10px;">請嘗試不同的搜尋條件或載入所有資料</p>
+            </div>
+        `;
+                return;
+            }
+            // 首先按 Type 分組
+            const typeGroups = {};
+            displayData.forEach(item => {
+                if (!item || !item.type) return;
+
+                const typeKey = item.type; // 'Number' 或 'Percentage'
+                if (!typeGroups[typeKey]) {
+                    typeGroups[typeKey] = {
+                        type: typeKey,
+                        typeName: typeKey === 'Number' ? '數值 (人數)' : '百分比',
+                        genderGroups: {}
+                    };
+                }
+                // 在每個 Type 下按 Gender 分組
+                const genderKey = item.gender || 'Total';
+                if (!typeGroups[typeKey].genderGroups[genderKey]) {
+                    typeGroups[typeKey].genderGroups[genderKey] = {
+                        gender: genderKey,
+                        genderName: getGenderText(genderKey),
+                        categoryGroups: {} // 新增：按類別分組
+                    };
+                }
+                // 在每個 Gender 下按 Category 分組
+                const categoryKey = item.category || 'a';
+                if (!typeGroups[typeKey].genderGroups[genderKey].categoryGroups[categoryKey]) {
+                    const categoryName = categoryKey === 'a' ? '甲類學科的科目' : '乙類學科的科目';
+                    const detailName = categoryKey === 'a' ? '甲類學科的科目 (細部)' : '乙類學科的科目 (細部)';
+                    typeGroups[typeKey].genderGroups[genderKey].categoryGroups[categoryKey] = {
+                        category: categoryKey,
+                        categoryName: categoryName,
+                        detailName: detailName,
+                        subjectGroups: {}
+                    };
+                }
+                // 在每個 Category 下按 Subject 分組
+                const subjectKey = item.subject || 'Unknown';
+                if (!typeGroups[typeKey].genderGroups[genderKey].categoryGroups[categoryKey].subjectGroups[subjectKey]) {
+                    typeGroups[typeKey].genderGroups[genderKey].categoryGroups[categoryKey].subjectGroups[subjectKey] = {
+                        subject: subjectKey,
+                        chineseName: subjectCategoryMap[subjectKey] || subjectKey,
+                        subject2Groups: {}
+                    };
+                }
+                // 在每個 Subject 下按 Subject_2 分組
+                const subject2Key = item.subject_2 || 'main';
+                if (!typeGroups[typeKey].genderGroups[genderKey].categoryGroups[categoryKey].subjectGroups[subjectKey].subject2Groups[subject2Key]) {
+                    typeGroups[typeKey].genderGroups[genderKey].categoryGroups[categoryKey].subjectGroups[subjectKey].subject2Groups[subject2Key] = {
+                        subject_2: item.subject_2,
+                        items: []
+                    };
+                }
+                // 添加項目到對應的 Subject_2 組
+                typeGroups[typeKey].genderGroups[genderKey].categoryGroups[categoryKey].subjectGroups[subjectKey].subject2Groups[subject2Key].items.push(item);
+            });
+            let accordionHTML = '';
+            let groupIndex = 0;
+            // 生成 Type 層級的摺疊組
+            Object.values(typeGroups).forEach(typeGroup => {
+                accordionHTML += `
+                    <div class="subject-group">
+                        <div class="dataset-header" onclick="toggleSubjectGroup(${groupIndex})">
+                            <div>
+                                <i class="fas fa-${typeGroup.type === 'Number' ? 'hashtag' : 'percent'}" style="margin-right: 8px;"></i>
+                                <span>${typeGroup.typeName}</span>
+                            </div>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                        <div id="subject-group-${groupIndex}" class="dataset-content" style="display: none;">
+                `;
+                groupIndex++;
+                // 生成 Gender 層級
+                Object.values(typeGroup.genderGroups).forEach(genderGroup => {
+                    accordionHTML += `
+                        <div class="subject-group" style="margin-left: 5px;">
+                            <div class="dataset-header" onclick="toggleSubjectGroup(${groupIndex})" style="background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);">
+                                <div>
+                                    <i class="fas fa-${genderGroup.gender === 'Male' ? 'mars' : genderGroup.gender === 'Female' ? 'venus' : 'users'}" style="margin-right: 8px;"></i>
+                                    <span>${genderGroup.genderName}</span>
+                                </div>
+                                <i class="fas fa-chevron-down"></i>
+                            </div>
+                            <div id="subject-group-${groupIndex}" class="dataset-content" style="display: none;">
+                    `;
+                    groupIndex++;
+                    // 生成 Category 層級（甲類/乙類）
+                    Object.values(genderGroup.categoryGroups).forEach(categoryGroup => {
+                        // 先顯示主要類別（如"甲類學科的科目"）
+                        accordionHTML += `
+                            <div class="subject-group" style="margin-left: 5px;">
+                                <div class="dataset-header" onclick="toggleSubjectGroup(${groupIndex})" style="background: linear-gradient(135deg, #93c5fd 0%, #60a5fa 100%);">
+                                    <div>
+                                        <i class="fas fa-${categoryGroup.category === 'a' ? 'book' : 'briefcase'}" style="margin-right: 8px;"></i>
+                                        <span>${categoryGroup.categoryName}</span>
+                                    </div>
+                                    <i class="fas fa-chevron-down"></i>
+                                </div>
+                                <div id="subject-group-${groupIndex}" class="dataset-content" style="display: none;">
+                        `;
+                        groupIndex++;
+                        // 再顯示細部類別（如"甲類學科的科目 (細部)"）
+                        accordionHTML += `
+                            <div class="subject-group" style="margin-left: 5px;">
+                                <div class="dataset-header" onclick="toggleSubjectGroup(${groupIndex})" style="background: linear-gradient(135deg, #bfdbfe 0%, #93c5fd 100%); color: #1f2937;">
+                                    <div>
+                                        <i class="fas fa-layer-group" style="margin-right: 8px;"></i>
+                                        <span>${categoryGroup.detailName}</span>
+                                    </div>
+                                    <i class="fas fa-chevron-down"></i>
+                                </div>
+                                <div id="subject-group-${groupIndex}" class="dataset-content" style="display: none;">
+                        `;
+                        groupIndex++;
+                        // 生成 Subject 層級
+                        Object.values(categoryGroup.subjectGroups).forEach(subjectGroup => {
+                            // 檢查科目是否屬於甲類或乙類的指定子集
+                            let isInSubset = false;
+                            let subsetType = '';
+                            if (categoryASubjects.includes(subjectGroup.subject)) {
+                                isInSubset = true;
+                                subsetType = 'All Category A subjects*';
+                            } else if (categoryBSubjects.includes(subjectGroup.subject)) {
+                                isInSubset = true;
+                                subsetType = 'All Category B subjects*';
+                            }
+                            // 添加子集標記
+                            const subsetMarker = isInSubset ?
+                                `<span class="info-badge" style="margin-left: 10px; background: #fef3c7; color: #92400e;">
+                                    <i class="fas fa-star"></i> ${subsetType}
+                                </span>` : '';
+                            accordionHTML += `
+                                <div class="subject-group" style="margin-left: 5px;">
+                                    <div class="dataset-header" onclick="toggleSubjectGroup(${groupIndex})" style="background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%); color: #1f2937;">
+                                        <div>
+                                            <i class="fas fa-graduation-cap" style="margin-right: 8px;"></i>
+                                            <span>${subjectGroup.subject} (${subjectGroup.chineseName})</span>
+                                            ${subsetMarker}
+                                        </div>
+                                        <i class="fas fa-chevron-down"></i>
+                                    </div>
+                                    <div id="subject-group-${groupIndex}" class="dataset-content" style="display: none;">
+                            `;
+                            groupIndex++;
+                            // 生成 Subject_2 層級（如果有多個部分）
+                            Object.values(subjectGroup.subject2Groups).forEach(subject2Group => {
+                                const subject2Display = subject2Group.subject_2 ?
+                                    subject2Group.subject_2 :
+                                    (categoryGroup.category === 'a' ? '主要部分' : '主要課程');
+                                accordionHTML += `
+                                    <div class="subject-group" style="margin-left: 5px;">
+                                        <div class="dataset-header" onclick="toggleSubjectGroup(${groupIndex})" style="background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%); color: #1f2937; border: 1px solid #e5e7eb;">
+                                            <div>
+                                                <i class="fas fa-${subject2Group.subject_2 ? 'layer-group' : 'file'}" style="margin-right: 8px;"></i>
+                                                <span>${subject2Display}</span>
+                                            </div>
+                                            <i class="fas fa-chevron-down"></i>
+                                        </div>
+                                        <div id="subject-group-${groupIndex}" class="dataset-content" style="display: none;">
+                                `;
+                                groupIndex++;
+                                // 顯示 Subject_2 組內的項目
+                                subject2Group.items.forEach((subjectData, index) => {
+                                    const isActive = activeSubject && activeSubject.id === subjectData.id;
+                                    const categoryText = categoryGroup.category === 'a' ? '甲類科目 (學術科目)' : '乙類科目 (應用學習)';
+                                    accordionHTML += `
+                                        <div class="subject-item ${isActive ? 'active' : ''}"
+                                             onclick="selectSubject('${subjectData.id}')"
+                                             data-id="${subjectData.id}">
+                                            <div class="subject-name">${subjectData.year}年 - ${categoryText}</div>
+                                            <div class="subject-details">
+                                                ${generateSubjectSummary(subjectData)}
+                                            </div>
+                                            <div class="subject-info">
+                                                <span class="info-badge">
+                                                    <i class="fas fa-${categoryGroup.category === 'a' ? 'chart-line' : 'award'}"></i>
+                                                    ${categoryText}
+                                                </span>
+                                                <span class="info-badge">
+                                                    <i class="fas fa-calendar"></i>
+                                                    ${subjectData.year}年
+                                                </span>
+                                                <span class="info-badge">
+                                                    <i class="fas fa-${typeGroup.type === 'Number' ? 'hashtag' : 'percent'}"></i>
+                                                    ${typeGroup.typeName}
+                                                </span>
+                                            </div>
+                                            ${isActive ? generateSubjectDetails(subjectData) : ''}
+                                        </div>
+                                    `;
+                                });
+                                // 關閉 Subject_2 層級
+                                accordionHTML += `
+                                        </div>
+                                    </div>
+                                `;
+                            });
+                            // 關閉 Subject 層級
+                            accordionHTML += `
+                                </div>
+                            </div>
+                            `;
+                        });
+                        // 關閉細部 Category 層級
+                        accordionHTML += `
+                                </div>
+                            </div>
+                        `;
+                        // 關閉主要 Category 層級
+                        accordionHTML += `
+                                </div>
+                            </div>
+                        `;
+                    });
+                    // 關閉 Gender 層級
+                    accordionHTML += `
+                            </div>
+                        </div>
+                    `;
+                });
+                // 關閉 Type 層級
+                accordionHTML += `
+                        </div>
+                    </div>
+                `;
+            });
+            container.innerHTML = accordionHTML;
+        }
+        // 生成科目摘要 - 修復數據訪問問題
+        function generateSubjectSummary(subject) {
+            if (!subject) return '';
+            if (subject.category === 'a') {
+                if (currentDataType === 'Number') {
+                    const entered = parseNumber(subject['No. Entered'] || subject['No. of candidates entered'] || 0);
+                    const sat = parseNumber(subject['No. Sat'] || subject['No. of candidates sat'] || 0);
+                    return `
+                <span>報考人數: ${formatNumber(entered)}</span>
+                <span style="margin-left: 10px;">出席人數: ${formatNumber(sat)}</span>
+            `;
+                } else {
+                    const performance5xx = parsePercentage(subject['5**'] || subject['% of candidates awarded 5** or above'] || 0);
+                    const performance4Plus = parsePercentage(subject['4+'] || subject['% of candidates awarded 4 or above'] || 0);
+                    return `
+                <span>5**級或以上: ${formatPercentage(performance5xx)}%</span>
+                <span style="margin-left: 10px;">4級或以上: ${formatPercentage(performance4Plus)}%</span>
+            `;
+                }
+            } else {
+                if (currentDataType === 'Number') {
+                    const entered = parseNumber(subject['No. Entered'] || subject['No. of candidates entered'] || 0);
+                    const attended = parseNumber(subject['No. of candidates fulfilling attendance requirement'] || 0);
+                    return `
+                <span>報考人數: ${formatNumber(entered)}</span>
+                <span style="margin-left: 10px;">出席人數: ${formatNumber(attended)}</span>
+            `;
+                } else {
+                    const distinctionII = parsePercentage(subject['Distinction(II)'] || subject['% of candidates awarded "Attained with Distinction (II)"'] || 0);
+                    const attainedPlus = parsePercentage(subject['Attained+'] || subject['% of candidates awarded "Attained" or above'] || 0);
+                    return `
+                <span>達標並表現優異(II): ${formatPercentage(distinctionII)}%</span>
+                <span style="margin-left: 10px;">達標或以上: ${formatPercentage(attainedPlus)}%</span>
+            `;
+                }
+            }
+        }
+        // 格式化數字 - 修復：使用安全的 parseNumber
+        function formatNumber(num) {
+            const numberValue = parseNumber(num);
+            if (numberValue === 0) return '0';
+            if (numberValue < 1 && numberValue > 0) return numberValue.toFixed(2);
+            return numberValue.toLocaleString('zh-HK');
+        }
+        // 格式化百分比 - 修復：使用安全的 parsePercentage
+        function formatPercentage(num) {
+            const percentageValue = parsePercentage(num);
+            if (percentageValue === 0) return '0.0';
+            // 如果是整數，顯示整數，否則顯示一位小數
+            return percentageValue % 1 === 0 ?
+                percentageValue.toString() :
+                percentageValue.toFixed(1);
+        }
+        // 獲取性別文本
+        function getGenderText(gender) {
+            const genderMap = {
+                'Male': '男生',
+                'Female': '女生',
+                'Total': '總計'
+            };
+            return genderMap[gender] || gender;
+        }
+        // 生成科目詳細資訊
+        function generateSubjectDetails(subject) {
+            if (subject.category === 'a') {
+                if (currentDataType === 'Number') {
+                    return `
+                        <div class="subject-stats-details">
+                            <div class="stat-row">
+                                <div class="stat-label">科目類別:</div>
+                                <div class="stat-value">甲類科目 (學術科目)</div>
+                            </div>
+                            <div class="stat-row">
+                                <div class="stat-label">科目名稱:</div>
+                                <div class="stat-value">${subject.subject}${subject.subject_2 ? ` - ${subject.subject_2}` : ''}</div>
+                            </div>
+                            <div class="stat-row">
+                                <div class="stat-label">性別:</div>
+                                <div class="stat-value">${getGenderText(subject.gender)}</div>
+                            </div>
+                            <div class="stat-row">
+                                <div class="stat-label">報考人數:</div>
+                                <div class="stat-value">${formatNumber(subject['No. Entered'] || 0)}</div>
+                            </div>
+                            <div class="stat-row">
+                                <div class="stat-label">出席人數:</div>
+                                <div class="stat-value">${formatNumber(subject['No. Sat'] || 0)}</div>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    return `
+                        <div class="subject-stats-details">
+                            <div class="stat-row">
+                                <div class="stat-label">科目類別:</div>
+                                <div class="stat-value">甲類科目 (學術科目)</div>
+                            </div>
+                            <div class="stat-row">
+                                <div class="stat-label">科目名稱:</div>
+                                <div class="stat-value">${subject.subject}${subject.subject_2 ? ` - ${subject.subject_2}` : ''}</div>
+                            </div>
+                            <div class="stat-row">
+                                <div class="stat-label">性別:</div>
+                                <div class="stat-value">${getGenderText(subject.gender)}</div>
+                            </div>
+                            <div class="stat-row">
+                                <div class="stat-label">成績分佈 (百分比):</div>
+                                <div class="stat-value"></div>
+                            </div>
+                            ${generatePercentageBar('5**級或以上', subject['5**'])}
+                            ${generatePercentageBar('5*級或以上', subject['5*+'])}
+                            ${generatePercentageBar('5級或以上', subject['5+'])}
+                            ${generatePercentageBar('4級或以上', subject['4+'])}
+                            ${generatePercentageBar('3級或以上', subject['3+'])}
+                            ${generatePercentageBar('2級或以上', subject['2+'])}
+                            ${generatePercentageBar('1級或以上', subject['1+'])}
+                            ${generatePercentageBar('U級', subject['U'])}
+                        </div>
+                    `;
+                }
+            } else {
+                if (currentDataType === 'Number') {
+                    return `
+                        <div class="subject-stats-details">
+                            <div class="stat-row">
+                                <div class="stat-label">科目類別:</div>
+                                <div class="stat-value">乙類科目 (應用學習)</div>
+                            </div>
+                            <div class="stat-row">
+                                <div class="stat-label">科目名稱:</div>
+                                <div class="stat-value">${subject.subject}${subject.subject_2 ? ` - ${subject.subject_2}` : ''}</div>
+                            </div>
+                            <div class="stat-row">
+                                <div class="stat-label">性別:</div>
+                                <div class="stat-value">${getGenderText(subject.gender)}</div>
+                            </div>
+                            <div class="stat-row">
+                                <div class="stat-label">報考人數:</div>
+                                <div class="stat-value">${formatNumber(subject['No. Entered'] || 0)}</div>
+                            </div>
+                            <div class="stat-row">
+                                <div class="stat-label">符合出席要求人數:</div>
+                                <div class="stat-value">${formatNumber(subject['No. of candidates fulfilling attendance requirement'] || 0)}</div>
+                            </div>
+                            <div class="stat-row">
+                                <div class="stat-label">成績分佈 (人數):</div>
+                                <div class="stat-value"></div>
+                            </div>
+                            <div class="stat-row">
+                                <div class="stat-label">達標並表現優異(II):</div>
+                                <div class="stat-value">${formatNumber(subject['Distinction(II)'] || 0)}</div>
+                            </div>
+                            <div class="stat-row">
+                                <div class="stat-label">達標並表現優異(I)或以上:</div>
+                                <div class="stat-value">${formatNumber(subject['Distinction(I)+'] || 0)}</div>
+                            </div>
+                            <div class="stat-row">
+                                <div class="stat-label">達標或以上:</div>
+                                <div class="stat-value">${formatNumber(subject['Attained+'] || 0)}</div>
+                            </div>
+                            <div class="stat-row">
+                                <div class="stat-label">未達標:</div>
+                                <div class="stat-value">${formatNumber(subject['Unattained'] || 0)}</div>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    return `
+                        <div class="subject-stats-details">
+                            <div class="stat-row">
+                                <div class="stat-label">科目類別:</div>
+                                <div class="stat-value">乙類科目 (應用學習)</div>
+                            </div>
+                            <div class="stat-row">
+                                <div class="stat-label">科目名稱:</div>
+                                <div class="stat-value">${subject.subject}${subject.subject_2 ? ` - ${subject.subject_2}` : ''}</div>
+                            </div>
+                            <div class="stat-row">
+                                <div class="stat-label">性別:</div>
+                                <div class="stat-value">${getGenderText(subject.gender)}</div>
+                            </div>
+                            <div class="stat-row">
+                                <div class="stat-label">成績分佈 (百分比):</div>
+                                <div class="stat-value"></div>
+                            </div>
+                            ${generatePercentageBar('達標並表現優異(II)', subject['% of candidates awarded "Attained with Distinction (II)"'])}
+                            ${generatePercentageBar('達標並表現優異(I)或以上', subject['% of candidates awarded "Attained with Distinction (I)" or above'])}
+                            ${generatePercentageBar('達標或以上', subject['% of candidates awarded "Attained" or above'])}
+                            ${generatePercentageBar('未達標', subject['% of candidates awarded "Unattained"'])}
+                        </div>
+                    `;
+                }
+            }
+        }
+        // 生成百分比條 - 修復：使用安全的 parsePercentage
+        function generatePercentageBar(label, value) {
+            const safeValue = parsePercentage(value);
+            if (safeValue === 0 || !safeValue) {
+                return `
+            <div class="stat-row">
+                <div class="stat-label">${label}:</div>
+                <div class="stat-value">0.0%</div>
+            </div>
+            <div class="percentage-bar">
+                <div class="percentage-fill" style="width: 0%"></div>
+            </div>
+        `;
+            }
+            const clampedValue = Math.min(Math.max(safeValue, 0), 100);
+            return `
+        <div class="stat-row">
+            <div class="stat-label">${label}:</div>
+            <div class="stat-value">${formatPercentage(clampedValue)}%</div>
+        </div>
+        <div class="percentage-bar">
+            <div class="percentage-fill" style="width: ${clampedValue}%"></div>
+        </div>
+    `;
+        }
+        // 切換摺疊群組
+        function toggleSubjectGroup(index) {
+            const content = document.getElementById(`subject-group-${index}`);
+            const header = content.previousElementSibling;
+            const icon = header.querySelector('.fa-chevron-down, .fa-chevron-up');
+            if (content.style.display === 'none') {
+                content.style.display = 'block';
+                header.classList.add('active');
+                if (icon) icon.className = 'fas fa-chevron-up';
+            } else {
+                content.style.display = 'none';
+                header.classList.remove('active');
+                if (icon) icon.className = 'fas fa-chevron-down';
+            }
+        }
+        // 選擇科目
+        function selectSubject(subjectId) {
+            const subject = filteredData.find(s => s.id === subjectId);
+            if (!subject) return;
+            document.querySelectorAll('.subject-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            const item = document.querySelector(`.subject-item[data-id="${subjectId}"]`);
+            if (item) {
+                item.classList.add('active');
+                // 移除現有的詳細信息
+                const existingDetails = item.querySelector('.subject-stats-details');
+                if (existingDetails) {
+                    existingDetails.remove();
+                }
+                // 添加新的詳細信息
+                const details = generateSubjectDetails(subject);
+                item.insertAdjacentHTML('beforeend', details);
+            }
+            item?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            activeSubject = subject;
+        }
+        // 顯示通知
+        function showNotification(message, type = 'info') {
+            const existingNotification = document.querySelector('.notification');
+            if (existingNotification) {
+                existingNotification.remove();
+            }
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.innerHTML = `
+                <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
+                <span>${message}</span>
+            `;
+            document.body.appendChild(notification);
+            setTimeout(() => {
+                notification.style.animation = 'slideOut 0.3s ease-out';
+                setTimeout(() => notification.remove(), 300);
+            }, 3000);
+        }
+        // 初始化教程
+        if (!localStorage.getItem('hkdseTutorialShown')) {
+            setTimeout(() => {
+                alert("歡迎使用「HKDSE成績分析」查詢系統！\n\n主要功能：\n• 選擇年份和科目大類查看不同數據\n• 使用篩選器按性別、科目類別篩選資料\n• 點擊「數值/百分比」按鈕切換顯示模式\n• 點擊科目名稱可展開查看詳細成績分佈\n• 資料會自動緩存在瀏覽器中，下次使用無需重新下載");
+                localStorage.setItem('hkdseTutorialShown', 'true');
+            }, 1000);
+        }
+    </script>
+</body>
+
+</html>
